@@ -1,0 +1,481 @@
+<html>
+
+<head>
+    <title>RackPro: Transaction Analytics</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+         :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+            --card-bg-color: #ffffff;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1,
+        h2 {
+            margin: 0;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        nav {
+            background-color: var(--card-bg-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        nav ul li {
+            padding: 15px 20px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        
+        nav ul li a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .analytics-card {
+            background-color: var(--card-bg-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .analytics-card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+        
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-group label {
+            margin-right: 10px;
+        }
+        
+        select,
+        input[type="date"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: var(--primary-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .pagination button {
+            margin: 0 5px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>StockPro: Transaction Analytics</h1>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/transactions/analytics/dashboard">Dashboard</a></li>
+            <li><a href="/transactions/analytics/products">Products</a></li>
+            <li><a href="/transactions/analytics">Analytics</a></li>
+            <li><a href="/transactions/analytics/settings">Settings</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div class="filters">
+            <div class="filter-group">
+                <label for="dateRange">Date Range:</label>
+                <select id="dateRange">
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last 365 days</option>
+          <option value="custom">Custom</option>
+        </select>
+            </div>
+            <div class="filter-group" id="customDateRange" style="display: none;">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="filter-group">
+                <label for="productFilter">Product:</label>
+                <select id="productFilter">
+          <option value="all">All Products</option>
+          <option value="stock">Stocks</option>
+          <option value="bond">Bonds</option>
+          <option value="etf">ETFs</option>
+          <option value="crypto">Cryptocurrencies</option>
+        </select>
+            </div>
+            <button onclick="applyFilters()">Apply Filters</button>
+        </div>
+
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h3>Transaction Volume</h3>
+                <div class="chart-container">
+                    <canvas id="transactionVolumeChart"></canvas>
+                </div>
+            </div>
+            <div class="analytics-card">
+                <h3>Transaction Value</h3>
+                <div class="chart-container">
+                    <canvas id="transactionValueChart"></canvas>
+                </div>
+            </div>
+            <div class="analytics-card">
+                <h3>Top Products</h3>
+                <div class="chart-container">
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+            </div>
+            <div class="analytics-card">
+                <h3>Transaction Types</h3>
+                <div class="chart-container">
+                    <canvas id="transactionTypesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <h2>Recent Transactions</h2>
+        <table id="transactionsTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table rows will be populated dynamically -->
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button onclick="changePage(-1)">Previous</button>
+            <span id="currentPage">Page 1</span>
+            <button onclick="changePage(1)">Next</button>
+        </div>
+    </main>
+
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        function applyFilters() {
+            // Here you would typically fetch data from your backend based on the selected filters
+            // For this example, we'll just update the charts and table with mock data
+            updateCharts();
+            updateTransactionTable();
+        }
+
+        function updateCharts() {
+            // Transaction Volume Chart
+            new Chart(document.getElementById('transactionVolumeChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                    datasets: [{
+                        label: 'Transaction Volume',
+                        data: [12, 19, 3, 5, 2, 3, 10],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Transaction Value Chart
+            new Chart(document.getElementById('transactionValueChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                    datasets: [{
+                        label: 'Transaction Value',
+                        data: [1200, 1900, 300, 500, 200, 300, 1000],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Top Products Chart
+            new Chart(document.getElementById('topProductsChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Stocks', 'Bonds', 'ETFs', 'Cryptocurrencies'],
+                    datasets: [{
+                        data: [300, 50, 100, 80],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Transaction Types Chart
+            new Chart(document.getElementById('transactionTypesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Buy', 'Sell', 'Transfer'],
+                    datasets: [{
+                        data: [70, 25, 5],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(255, 206, 86, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function updateTransactionTable() {
+            const table = document.getElementById('transactionsTable').getElementsByTagName('tbody')[0];
+            table.innerHTML = ''; // Clear existing rows
+
+            // Mock data - in a real application, this would come from your backend
+            const transactions = [{
+                date: '2023-06-01',
+                product: 'AAPL Stock',
+                type: 'Buy',
+                quantity: 10,
+                price: 150.25,
+                total: 1502.50
+            }, {
+                date: '2023-06-02',
+                product: 'GOOGL Stock',
+                type: 'Sell',
+                quantity: 5,
+                price: 2500.75,
+                total: 12503.75
+            }, {
+                date: '2023-06-03',
+                product: 'BTC',
+                type: 'Buy',
+                quantity: 0.1,
+                price: 30000,
+                total: 3000
+            }, {
+                date: '2023-06-04',
+                product: 'US Treasury Bond',
+                type: 'Buy',
+                quantity: 1,
+                price: 1000,
+                total: 1000
+            }, {
+                date: '2023-06-05',
+                product: 'SPY ETF',
+                type: 'Buy',
+                quantity: 20,
+                price: 400.50,
+                total: 8010
+            }, {
+                date: '2023-06-06',
+                product: 'MSFT Stock',
+                type: 'Sell',
+                quantity: 15,
+                price: 300.25,
+                total: 4503.75
+            }, {
+                date: '2023-06-07',
+                product: 'ETH',
+                type: 'Buy',
+                quantity: 2,
+                price: 1800,
+                total: 3600
+            }, {
+                date: '2023-06-08',
+                product: 'AMZN Stock',
+                type: 'Buy',
+                quantity: 5,
+                price: 3200,
+                total: 16000
+            }, {
+                date: '2023-06-09',
+                product: 'Corporate Bond',
+                type: 'Sell',
+                quantity: 10,
+                price: 95,
+                total: 950
+            }, {
+                date: '2023-06-10',
+                product: 'Gold ETF',
+                type: 'Buy',
+                quantity: 50,
+                price: 180.50,
+                total: 9025
+            }];
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedTransactions = transactions.slice(start, end);
+
+            paginatedTransactions.forEach(transaction => {
+                const row = table.insertRow();
+                Object.values(transaction).forEach(value => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
+                });
+            });
+
+            document.getElementById('currentPage').textContent = `Page ${currentPage}`;
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            if (currentPage < 1) currentPage = 1;
+            updateTransactionTable();
+        }
+
+        document.getElementById('dateRange').addEventListener('change', function(e) {
+            const customDateRange = document.getElementById('customDateRange');
+            if (e.target.value === 'custom') {
+                customDateRange.style.display = 'flex';
+            } else {
+                customDateRange.style.display = 'none';
+            }
+        });
+
+        // Initial load
+        updateCharts();
+        updateTransactionTable();
+    </script>
+</body>
+
+</html>
